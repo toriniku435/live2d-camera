@@ -35,3 +35,6 @@ proguard-project.txt
 *.iml
 .idea
 .kotlin/
+
+# Cubism SDK
+app/src/main/cpp/third_party/cubism/
