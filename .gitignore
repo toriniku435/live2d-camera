@@ -38,3 +38,6 @@ proguard-project.txt
 
 # Cubism SDK
 app/src/main/cpp/third_party/cubism/
+
+# External Native Build (CMake / NDK)
+**/.cxx/
