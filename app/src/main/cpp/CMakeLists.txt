@@ -8,18 +8,20 @@ set(CMAKE_CXX_STANDARD 14)
 set(CMAKE_CXX_STANDARD_REQUIRED ON)
 set(CMAKE_CXX_EXTENSIONS OFF)
 
-add_subdirectory(modules/cubism)
-
 # Make library for android app (JNI bridge)
 add_library(${APP_NAME} SHARED
-        bridge/AppJniBridge.cpp
+        bridge/JniBridgeC.cpp
 )
 
-if (TARGET CubismModule)
-    message(STATUS "CubismModule is a TARGET")
-else()
-    message(FATAL_ERROR "CubismModule is NOT a target (will become -lLive2DCubismCore)")
-endif()
+target_include_directories(${APP_NAME} PRIVATE
+        ${CMAKE_CURRENT_LIST_DIR}/third_party
+)
+
+target_sources(${APP_NAME} PRIVATE
+        ${CMAKE_CURRENT_LIST_DIR}/third_party/stb/stb_image_impl.cpp
+)
+
+add_subdirectory(modules/cubism)
 
 # Link libraries to app.
 target_link_libraries(${APP_NAME}

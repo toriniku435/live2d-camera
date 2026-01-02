@@ -1,47 +1,94 @@
 package com.live2d.camera
 
+import android.opengl.GLSurfaceView
 import android.os.Bundle
+import android.view.MotionEvent
 import androidx.activity.ComponentActivity
-import androidx.activity.compose.setContent
-import androidx.activity.enableEdgeToEdge
-import androidx.compose.foundation.layout.fillMaxSize
-import androidx.compose.foundation.layout.padding
-import androidx.compose.material3.Scaffold
-import androidx.compose.material3.Text
-import androidx.compose.runtime.Composable
-import androidx.compose.ui.Modifier
-import androidx.compose.ui.tooling.preview.Preview
-import com.live2d.camera.ui.theme.Live2dcameraTheme
+import androidx.core.view.WindowCompat
+import androidx.core.view.WindowInsetsCompat
+import androidx.core.view.WindowInsetsControllerCompat
+import com.live2d.camera.infrastructure.cubism.GLRenderer
+import com.live2d.camera.infrastructure.cubism.JniBridgeJava
+
 
 class MainActivity : ComponentActivity() {
+
+    private lateinit var glSurfaceView: GLSurfaceView
+    private lateinit var glRenderer: GLRenderer
+
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
-        enableEdgeToEdge()
-        setContent {
-            Live2dcameraTheme {
-                Scaffold(modifier = Modifier.fillMaxSize()) { innerPadding ->
-                    Greeting(
-                        name = "Android",
-                        modifier = Modifier.padding(innerPadding)
-                    )
-                }
-            }
+
+        JniBridgeJava.SetActivityInstance(this)
+        JniBridgeJava.SetContext(this)
+        glSurfaceView = GLSurfaceView(this)
+        glSurfaceView.setEGLContextClientVersion(2)
+        glRenderer = GLRenderer()
+        glSurfaceView.setRenderer(glRenderer)
+        glSurfaceView.setRenderMode(GLSurfaceView.RENDERMODE_CONTINUOUSLY)
+        setContentView(glSurfaceView)
+
+        WindowCompat.setDecorFitsSystemWindows(window, false)
+
+        WindowInsetsControllerCompat(window, window.decorView).apply {
+            hide(
+                WindowInsetsCompat.Type.systemBars()
+            )
+            systemBarsBehavior =
+                WindowInsetsControllerCompat.BEHAVIOR_SHOW_TRANSIENT_BARS_BY_SWIPE
         }
     }
-}
 
-@Composable
-fun Greeting(name: String, modifier: Modifier = Modifier) {
-    Text(
-        text = "Hello $name!",
-        modifier = modifier
-    )
-}
-
-@Preview(showBackground = true)
-@Composable
-fun GreetingPreview() {
-    Live2dcameraTheme {
-        Greeting("Android")
+    override fun onStart() {
+        super.onStart()
+        JniBridgeJava.nativeOnStart()
     }
+
+    override fun onResume() {
+        super.onResume()
+        glSurfaceView.onResume()
+    }
+
+    override fun onPause() {
+        super.onPause()
+        glSurfaceView.onPause()
+        JniBridgeJava.nativeOnPause()
+    }
+
+    override fun onStop() {
+        super.onStop()
+        JniBridgeJava.nativeOnStop()
+    }
+
+    override fun onDestroy() {
+        super.onDestroy()
+        JniBridgeJava.nativeOnDestroy()
+    }
+
+    override fun onTouchEvent(event: MotionEvent): Boolean {
+        val pointX = event.getX()
+        val pointY = event.getY()
+
+        // GLSurfaceViewのイベント処理キューにタッチイベントを追加する。
+        glSurfaceView.queueEvent(
+            object : Runnable {
+                override fun run() {
+                    when (event.getAction()) {
+                        MotionEvent.ACTION_DOWN -> JniBridgeJava.nativeOnTouchesBegan(
+                            pointX,
+                            pointY
+                        )
+
+                        MotionEvent.ACTION_UP -> JniBridgeJava.nativeOnTouchesEnded(pointX, pointY)
+                        MotionEvent.ACTION_MOVE -> JniBridgeJava.nativeOnTouchesMoved(
+                            pointX,
+                            pointY
+                        )
+                    }
+                }
+            }
+        )
+        return super.onTouchEvent(event)
+    }
+
 }

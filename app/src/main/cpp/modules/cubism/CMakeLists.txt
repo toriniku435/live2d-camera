@@ -16,16 +16,30 @@ set_target_properties(Live2DCubismCore
     INTERFACE_INCLUDE_DIRECTORIES ${CORE_PATH}/include
 )
 
+
+
 # Specify Cubism Framework rendering.
 set(FRAMEWORK_SOURCE OpenGL)
 # Add Cubism Native Framework.
 add_subdirectory(${FRAMEWORK_PATH} ${CMAKE_CURRENT_BINARY_DIR}/Framework)
+add_subdirectory(common)
 # Add rendering definition to framework.
 target_compile_definitions(Framework PUBLIC CSM_TARGET_ANDROID_ES2)
 
-add_library(CubismModule STATIC
-    CubismController.cpp
+set(CUBISM_SRC
+        LAppDefine.cpp
+        LAppMinimumLive2DManager.cpp
+        LAppMinimumDelegate.cpp
+        LAppMinimumModel.cpp
+        LAppMinimumView.cpp
+        LAppPal.cpp
+        LAppSprite.cpp
+        LAppSpriteShader.cpp
+        LAppTextureManager.cpp
 )
+
+add_library(CubismModule STATIC ${CUBISM_SRC})
+
 
 target_link_libraries(CubismModule PUBLIC
         Framework
