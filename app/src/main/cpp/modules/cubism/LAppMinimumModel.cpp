@@ -267,7 +267,7 @@ void LAppMinimumModel::Update()
 
     //-----------------------------------------------------------------
     _model->LoadParameters(); // 前回セーブされた状態をロード
-    if (_motionManager->IsFinished())
+/*    if (_motionManager->IsFinished())
     {
         // モーションの再生がない場合、始めに登録されているモーションを再生する
         StartMotion(LAppDefine::MotionGroupIdle, 0, LAppDefine::PriorityIdle);
@@ -275,7 +275,7 @@ void LAppMinimumModel::Update()
     else
     {
         motionUpdated = _motionManager->UpdateMotion(_model, deltaTimeSeconds); // モーションを更新
-    }
+    }*/
     _model->SaveParameters(); // 状態を保存
     //-----------------------------------------------------------------
 
